@@ -30,7 +30,7 @@ class JobSet():
         if self.platform == 'local':
             for job in self.jobs:
                 if len(self.get_running_jobs()) < self.num_max_cuncurrent_jobs:
-                    if not job.started():
+                    if not job.is_started():
                         job.id = subprocess.Popen(job.command, 
                                                 shell = True,
                                                 preexec_fn=os.setsid).pid
@@ -50,13 +50,41 @@ class JobSet():
         return next((x for x in self.jobs if x.name == name), None)
 
     def get_running_jobs(self):
-        list_running_jobs = []
+        jobs_list = []
         for job in self.jobs:
             if ((not job.id == None) and 
                 (psutil.pid_exists(job.id)) and
                 (not psutil.Process(job.id).status()=='zombie')):
-                list_running_jobs.append(job)
-        return list_running_jobs
+                jobs_list.append(job)
+        return jobs_list
+
+    def get_ready_jobs(self):
+        jobs_list = []
+        for job in self.jobs:
+            if (job.is_ready()):
+                jobs_list.append(job)
+        return jobs_list
+
+    def get_completed_jobs(self):
+        jobs_list = []
+        for job in self.jobs:
+            if (job.is_completed()):
+                jobs_list.append(job)
+        return jobs_list
+
+    def get_successful_jobs(self):
+        jobs_list = []
+        for job in self.jobs:
+            if (job.is_successful()):
+                jobs_list.append(job)
+        return jobs_list
+
+    def get_started_jobs(self):
+        jobs_list = []
+        for job in self.jobs:
+            if (job.is_started()):
+                jobs_list.append(job)
+        return jobs_list
 
     def to_pickle(self, filename):
         with open(filename, 'wb') as fid:
