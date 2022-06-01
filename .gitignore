@@ -127,3 +127,13 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+examples/jobs.pickle
+examples/000_folder/000.end
+examples/000_folder/000.out
+examples/000_folder/000.start
+examples/000_folder/001.end
+examples/000_folder/001.out
+examples/000_folder/001.start
+examples/000_folder/002.end
+examples/000_folder/002.out
+examples/000_folder/002.start
