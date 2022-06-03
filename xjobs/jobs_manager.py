@@ -1,7 +1,8 @@
 import subprocess
 import os
-import psutil
+#import psutil
 import pickle
+import datetime
 
 def read_pickle(filename):
     with open(filename,'rb') as fid:
@@ -29,57 +30,57 @@ class JobSet():
     def launch_jobs(self):
         if self.platform == 'local':
             for job in self.jobs:
-                if len(self.get_running_jobs()) < self.num_max_cuncurrent_jobs:
+                if len(self.get_running()) < self.num_max_cuncurrent_jobs:
                     if not job.is_started():
-                        job.id = subprocess.Popen(job.command, 
+                        job.id.process = subprocess.Popen(job.command, 
                                                 shell = True,
-                                                preexec_fn=os.setsid).pid
+                                                preexec_fn=os.setsid)
+                        job.id.pid = job.id.process.pid
+                        job.id.start_time = datetime.datetime.now()
                 else:
                     break
             return
 
         if self.platform == 'LSF':
-            print('Not implemented')
+            raise NotImplementedError
 
         if self.platform == 'HTCondor':
-            print('Not implemented')
+            raise NotImplementedError
         else:
-            print('Not implemented') 
+            raise NotImplementedError
 
     def __getitem__(self, name):
         return next((x for x in self.jobs if x.name == name), None)
 
-    def get_running_jobs(self):
+    def get_running(self):
         jobs_list = []
         for job in self.jobs:
-            if ((not job.id == None) and 
-                (psutil.pid_exists(job.id)) and
-                (not psutil.Process(job.id).status()=='zombie')):
+            if job.is_running():
                 jobs_list.append(job)
         return jobs_list
 
-    def get_ready_jobs(self):
+    def get_ready(self):
         jobs_list = []
         for job in self.jobs:
             if (job.is_ready()):
                 jobs_list.append(job)
         return jobs_list
 
-    def get_completed_jobs(self):
+    def get_done(self):
         jobs_list = []
         for job in self.jobs:
-            if (job.is_completed()):
+            if (job.is_done()):
                 jobs_list.append(job)
         return jobs_list
 
-    def get_successful_jobs(self):
+    def get_successful(self):
         jobs_list = []
         for job in self.jobs:
             if (job.is_successful()):
                 jobs_list.append(job)
         return jobs_list
 
-    def get_started_jobs(self):
+    def get_started(self):
         jobs_list = []
         for job in self.jobs:
             if (job.is_started()):

@@ -1,23 +1,23 @@
 
+from xjobs import JobIdLocal
+
 class Job():
     
     # init method or constructor 
-    def __init__(self, name, command, started_condition, 
-                completed_condition, ready_condition,
+    def __init__(self, name, command, ready_condition,
                success_condition):
         self.name = name
         self.command = command
         self.ready_condition = ready_condition
         self.success_condition = success_condition
-        self.started_condition = started_condition
-        self.completed_condition = completed_condition
-        self.id = None
-        self.state = 'Not launched'
+        #self.started_condition = started_condition
+        #self.completed_condition = completed_condition
+        self.id = JobIdLocal()
 
-    def get_state(self):
+    def get_states(self):
         return {'started'   :self.is_started(),
                 'ready'     :self.is_ready(),
-                'completed' :self.is_completed(),
+                'completed' :self.is_done(),
                 'successful':self.is_successful(),
                  }
 
@@ -28,27 +28,20 @@ class Job():
     #            'success_condition': self.success_condition, 
     #            'id': self.id,
     #            'state':  self.state}
+
+    def is_running(self):
+        return self.id.is_running()
     
     def is_started(self):
-        if self.started_condition[0](**self.started_condition[1]):
-            return True
-        else:
-            return False
+        return self.id.is_started()
+
+    def is_done(self):
+        return self.id.is_done()
 
     def is_ready(self):
-        if self.ready_condition[0](**self.ready_condition[1]):
-            return True
-        else:
-            return False
-
-    def is_completed(self):
-        if self.completed_condition[0](**self.completed_condition[1]):
-            return True
-        else:
-            return False
+        return self.ready_condition.is_verified()
 
     def is_successful(self):
-        if self.success_condition[0](**self.success_condition[1]):
-            return True
-        else:
-            return False
+        if self.is_done():
+            return self.success_condition.is_verified()
+        return False
