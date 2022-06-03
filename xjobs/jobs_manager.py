@@ -1,6 +1,6 @@
 import subprocess
 import os
-#import psutil
+import pandas as pd
 import pickle
 import datetime
 
@@ -50,46 +50,70 @@ class JobSet():
             raise NotImplementedError
 
     def __getitem__(self, name):
-        return next((x for x in self.jobs if x.name == name), None)
+        if isinstance(name,str):
+            return next((x for x in self.jobs if x.name == name), None)
+        elif isinstance(name,int):
+            return self.jobs[name]
+        elif isinstance(name,slice):
+            return self.jobs[name]
+        else:
+            raise NotImplementedError
 
-    def get_running(self):
-        jobs_list = []
-        for job in self.jobs:
-            if job.is_running():
-                jobs_list.append(job)
-        return jobs_list
+    def __len__(self):
+        return len(self.jobs)
 
+    def get_running(self):                
+        return self.copy([job for job in self 
+                          if job.is_running()])
+        
     def get_ready(self):
-        jobs_list = []
-        for job in self.jobs:
-            if (job.is_ready()):
-                jobs_list.append(job)
-        return jobs_list
+        return self.copy([job for job in self 
+                          if job.is_ready()])
 
     def get_done(self):
-        jobs_list = []
-        for job in self.jobs:
-            if (job.is_done()):
-                jobs_list.append(job)
-        return jobs_list
+        return self.copy([job for job in self 
+                          if job.is_done()])
 
     def get_successful(self):
-        jobs_list = []
-        for job in self.jobs:
-            if (job.is_successful()):
-                jobs_list.append(job)
-        return jobs_list
+        return self.copy([job for job in self 
+                          if job.is_successful()])
 
     def get_started(self):
-        jobs_list = []
-        for job in self.jobs:
-            if (job.is_started()):
-                jobs_list.append(job)
-        return jobs_list
+        return self.copy([job for job in self 
+                          if job.is_started()])
 
     def to_pickle(self, filename):
         with open(filename, 'wb') as fid:
             pickle.dump(self, fid)
+
+    def copy(self, jobs = None):
+        if jobs == None:
+            jobs == self.jobs
+
+        return JobSet(jobs,
+            self.platform,
+            self.estimate_time,                             
+            self.job_flavor,
+            self.queue_name,
+            self.num_max_cuncurrent_jobs,
+            self.add_to_bsub,
+            self.add_to_condor_submit_file)
+
+    def to_DataFrame(self):
+        my_list = []
+        for job in self:
+            my_dict ={}
+            my_dict['job']=job
+            aux = job.get_states()
+            my_dict = {**my_dict,**aux}
+            my_list.append(my_dict)
+        return pd.DataFrame(my_list)
+
+    def kill(self):
+        for job in self:
+            job.kill()
+
+            
 
         
 

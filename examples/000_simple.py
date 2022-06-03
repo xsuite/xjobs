@@ -2,6 +2,15 @@
 import xjobs as xj
 import os
 
+# %% an empty JobSet
+my_jobs = xj.JobSet(
+    jobs = [],
+    platform = 'local',
+    num_max_cuncurrent_jobs=1
+)
+my_jobs.launch_jobs()
+
+# %% a simple JobSet
 my_jobs = xj.JobSet(
     jobs = [
         xj.Job(name='myjob1', command='./000_folder/run.sh Isaac Newton', 
@@ -32,23 +41,30 @@ my_jobs = xj.JobSet(
 
 my_jobs.to_pickle('jobs.pickle')
 
-# clean zombies 
-# https://stackoverflow.com/questions/2760652/how-to-kill-or-avoid-zombie-processes-with-subprocess-module
-# process.wait()
 # %%
 my_jobs = xj.read_pickle('jobs.pickle')
 
 # %%
+my_jobs.launch_jobs()
 len(my_jobs.get_running())
 
 # %%
 my_jobs.launch_jobs()
+my_jobs.kill()
 for job in my_jobs.jobs:
        print(job.is_running())
 
 
 # %%
-aux=my_jobs['myjob1']
-aux.get_states()
+my_jobs[0].get_states()
+
+# %%
+
+my_jobs.to_DataFrame()
+# %%
+my_jobs[3::-1]
+# %%
+print(my_jobs['myjob2'])
+
 
 # %%

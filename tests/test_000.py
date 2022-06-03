@@ -2,6 +2,7 @@
 import xjobs as xj
 import os
 
+
 def test_JobSet():
     my_jobs = xj.JobSet(
         jobs = [

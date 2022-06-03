@@ -1,5 +1,6 @@
 
 import psutil 
+from copy import deepcopy
 
 # use base_classes.py
 class JobId():
@@ -44,3 +45,6 @@ class JobIdLocal(JobId):
                 return True
             else:
                 return False
+
+    def kill(self):
+        psutil.Process(self.pid).kill()
